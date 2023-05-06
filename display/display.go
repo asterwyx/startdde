@@ -14,6 +14,9 @@ import (
 	"github.com/linuxdeepin/go-lib/log"
 )
 
+const MinScreenWidth = 1024.0;
+const MinScreenHeight = 768.0;
+
 var logger = log.NewLogger("daemon/display")
 
 const (
@@ -68,6 +71,48 @@ func (h *scaleFactorsHelper) GetScaleFactors() (map[string]float64, error) {
 		return nil, err
 	}
 	return rootCfg.Config.ScaleFactors, nil
+}
+
+func calcMaxScaleFactor(width, height float64) float64 {
+	scaleList := []float64{ 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0 }
+    maxWScale := width / MinScreenWidth;
+    maxHScale := height / MinScreenHeight;
+	maxScale := 3.0
+	if maxWScale < maxHScale {
+		maxScale = maxWScale
+	} else {
+		maxScale = maxHScale
+	}
+	idx := 0
+	for ; scaleList[idx] <= maxScale; idx++ {}
+	return scaleList[idx-1]
+}
+
+func (h *scaleFactorsHelper) AdjustScaleFactor(width, height uint16) {
+	// 每一次设置的模式的时候都需要注意，分辨率可能发生了变化，对于小分辨率的屏幕，不应该有过大的缩放比例
+	// 此时应该自动调整为推荐的最大缩放比例
+	scaleFactors, err := h.GetScaleFactors()
+	if err != nil {
+		logger.Warning(err)
+		return
+	}
+	logger.Debug(scaleFactors)
+	scaleFactor := scaleFactors["ALL"] // TODO 这里需要调整，不应该只考虑 ALL
+	logger.Debug("Current scale factor: ", scaleFactor)
+	maxScaleFactor := calcMaxScaleFactor(float64(width), float64(height))
+	logger.Debug("Calculated max scale factor: ", maxScaleFactor)
+	if scaleFactor > maxScaleFactor {
+		scaleFactor = maxScaleFactor
+	} else if scaleFactor < 1.0 {
+		scaleFactor = 1.0
+	}
+	scaleFactors["ALL"] = scaleFactor
+	logger.Debug(scaleFactors)
+	err = h.SetScaleFactors(scaleFactors)
+	if err != nil {
+		logger.Warning(err)
+		return
+	}
 }
 
 func (h *scaleFactorsHelper) SetChangedCb(fn func(factors map[string]float64) error) {

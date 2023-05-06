@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	x "github.com/linuxdeepin/go-x11-client"
+	"github.com/linuxdeepin/startdde/display"
 
 	dbus "github.com/godbus/dbus/v5"
 	"github.com/linuxdeepin/go-lib/dbusutil"
@@ -173,6 +174,9 @@ func (m *Monitor) setModeNoProp(mode ModeInfo) {
 		width, height = height, width
 	}
 
+	logger.Debug("Adjust scale factor in setModeNoProp.")
+	display.ScaleFactorsHelper.AdjustScaleFactor(width, height)
+
 	m.setWidth(width)
 	m.setHeight(height)
 	m.setRefreshRate(mode.Rate)
@@ -189,6 +193,9 @@ func (m *Monitor) setMode(mode ModeInfo) {
 	if needSwapWidthHeight(m.Rotation) {
 		width, height = height, width
 	}
+
+	logger.Debug("Adjust scale factor in setMode.")
+	display.ScaleFactorsHelper.AdjustScaleFactor(width, height)
 
 	m.setPropWidth(width)
 	m.setPropHeight(height)

@@ -252,6 +252,9 @@ func (m *Monitor) setMode(mode ModeInfo) {
 
 	swapWidthHeightWithRotation(m.Rotation, &width, &height)
 
+	logger.Debug("Adjust scale factor in setMode.")
+	ScaleFactorsHelper.AdjustScaleFactor(width, height);
+
 	m.setPropWidth(width)
 	m.setPropHeight(height)
 	m.setPropRefreshRate(mode.Rate)
@@ -265,6 +268,9 @@ func (m *Monitor) setModeNoEmitChanged(mode ModeInfo) {
 	height := mode.Height
 
 	swapWidthHeightWithRotation(m.Rotation, &width, &height)
+
+	logger.Debug("Adjust scale factor in setModeNoEmitChanged.")
+	ScaleFactorsHelper.AdjustScaleFactor(width, height);
 
 	m.Width = width
 	m.Height = height
