@@ -10,8 +10,6 @@ import (
 	"math"
 	"strconv"
 	"strings"
-
-	"github.com/linuxdeepin/go-gir/gio-2.0"
 )
 
 const (
@@ -257,6 +255,14 @@ var gsInfos = typeGSKeyInfos{
 		convertXsToGs: convertColorToStr,
 	},
 	{
+		gsKey:         "qt-dark-active-color",
+		gsType:        gsKeyTypeString,
+		xsKey:         "Qt/DarkActiveColor",
+		xsType:        &settingTypeColorVar,
+		convertGsToXs: convertStrToColor,
+		convertXsToGs: convertColorToStr,
+	},
+	{
 		gsKey:  "qt-font-name",
 		gsType: gsKeyTypeString,
 		xsKey:  "Qt/FontName",
@@ -283,6 +289,16 @@ var gsInfos = typeGSKeyInfos{
 		gsKey:  "primary-monitor-name",
 		gsType: gsKeyTypeString,
 		xsKey:  "Gdk/PrimaryMonitorName",
+	},
+	{
+		gsKey:  "dtk-size-mode",
+		gsType: gsKeyTypeInt,
+		xsKey:  "DTK/SizeMode",
+	},
+	{
+		gsKey:  "qt-scrollbar-policy",
+		gsType: gsKeyTypeInt,
+		xsKey:  "Qt/ScrollBarPolicy",
 	},
 }
 
@@ -382,7 +398,7 @@ func (info *typeGSKeyInfo) getKeySType() uint8 {
 	return settingTypeInteger
 }
 
-func (info *typeGSKeyInfo) getValue(s *gio.Settings) (result interface{}, err error) {
+func (info *typeGSKeyInfo) getValue(s configHeler) (result interface{}, err error) {
 	switch info.gsType {
 	case gsKeyTypeBool:
 		v := s.GetBoolean(info.gsKey)
@@ -405,7 +421,7 @@ func (info *typeGSKeyInfo) getValue(s *gio.Settings) (result interface{}, err er
 	return
 }
 
-func (info *typeGSKeyInfo) setValue(s *gio.Settings, v interface{}) error {
+func (info *typeGSKeyInfo) setValue(s configHeler, v interface{}) error {
 	var err error
 	if info.convertXsToGs != nil {
 		v, err = info.convertXsToGs(v)
